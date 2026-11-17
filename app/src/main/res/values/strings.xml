@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">DevMobile</string>
+    <string name="label_title">Title: %s</string>
+    <string name="label_category">Category: %s</string>
+    <string name="label_location">Location: %s</string>
+    <string name="location_tbd">Location TBD</string>
+    <string name="button_book">Book</string>
+    <plurals name="available_seats">
+        <item quantity="one">%d seat available</item>
+        <item quantity="other">%d seats available</item>
+    </plurals>
 </resources>

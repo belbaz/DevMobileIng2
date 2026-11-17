@@ -1,5 +1,6 @@
 package com.example.devmobile
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -9,20 +10,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import com.example.devmobile.ui.theme.DevMobileTheme
 
 // Create list of 5 events
 val eventTest = listOf(
-    Event(1, "Event 1", "Technologies", "Paris", 200),
-    Event(2, "Event 2", "Business", null, 100),
-    Event(3, "Event 3", "Design", "Lyon", 0),
-    Event(4, "Event 4", "Sport", "Marseille", 50),
-    Event(5, "Event 5", "Career", "Lille", 300)
+    Event(1, "Event 1", "Technologies", "Paris", 200, "Event 1 Technologies"),
+    Event(2, "Event 2", "Business", null, 1, ""),
+    Event(3, "Event 3", "Design", "Lyon", 0, ""),
+    Event(4, "Event 4", "Sport", "Marseille", 50, ""),
+    Event(5, "Event 5", "Career", "Lille", 100, "Event 5 Career")
 )
 
 // --- MAIN ACTIVITY ---
@@ -58,7 +65,7 @@ fun EventListScreen(events: List<Event>) {
     Scaffold(
         // The slot for the top app bar
         topBar = {
-            TopAppBar(title = { Text("DevMobile") })
+            TopAppBar(title = { Text(stringResource(R.string.app_name)) })
         }
     ) { innerPadding ->
         // innerPadding is the safe area left below the TopAppBar
@@ -126,21 +133,95 @@ fun EventCard(
         Column(modifier = Modifier.padding(16.dp)) {
 
             // Event details layout
-            Text("Title: " + event.title)
-            Text("Category: " + event.category)
+            Text(stringResource(R.string.label_title, event.title))
+            Text(stringResource(R.string.label_category, event.category))
 
-            // send location default if the location event is Null
-            Text("Location: " + (event.location ?: "Location DEFAULT"))
-            Text("Capacity: " + event.capacity)
+            val locationText = event.location ?: stringResource(R.string.location_tbd)
+            Text(stringResource(R.string.label_location, locationText))
 
-            // Create Button
-            Button(
-                onClick = onBook,
-                // Automatically disable the button if capacity is empty
-                enabled = event.capacity > 0
-            ) {
-                Text("Book")
+            //use plurals string for available seats
+            Text(pluralStringResource(R.plurals.available_seats, event.capacity, event.capacity))
+
+            Button(onClick = onBook, enabled = event.capacity > 0) {
+                Text(stringResource(R.string.button_book))
             }
         }
+    }
+}
+
+@Composable
+fun EventDetailScreen(event: Event, onBook: () -> Unit) {
+    // verticalScroll allows scrolling if the content is too tall
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Star icon
+        Icon(
+            imageVector = Icons.Default.Star,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+        )
+
+        // Text with String resources for plurals
+        Text(stringResource(R.string.label_title, event.title))
+        Text(stringResource(R.string.label_category, event.category))
+        val loc = event.location ?: stringResource(R.string.location_tbd)
+        Text(stringResource(R.string.label_location, loc))
+
+        // Description
+        Text("Description: " + event.description)
+        Text(pluralStringResource(R.plurals.available_seats, event.capacity, event.capacity))
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = onBook,
+            enabled = event.capacity > 0,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.button_book))
+        }
+    }
+}
+
+
+// preview event
+@Preview(showBackground = true)
+@Composable
+fun PreviewEventCardFull() {
+    DevMobileTheme {
+        EventCard(
+            event = Event(3, "Design", "Art", null, 0, "Complet"),
+            onCardClick = {},
+            onBook = {}
+        )
+    }
+}
+
+// preview Dark/Light for PreviewEventList
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewEventList() {
+    DevMobileTheme {
+        EventListScreen(events = eventTest)
+    }
+}
+
+// Preview Dark/Light Mode for PreviewEventDetail
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewEventDetail() {
+    DevMobileTheme {
+        EventDetailScreen(
+            event = eventTest[0],
+            onBook = {}
+        )
     }
 }
